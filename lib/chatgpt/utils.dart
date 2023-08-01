@@ -18,7 +18,6 @@ class GPTUtils {
         }));
 
     final responseJson = jsonDecode(response.body);
-    print(responseJson);
     return responseJson['choices'][0]['message']['content'];
   }
 }

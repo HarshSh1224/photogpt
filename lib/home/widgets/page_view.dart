@@ -4,8 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:photogpt/constants/app_methods.dart';
+import 'package:photogpt/image_to_text/scan_image.dart';
 import 'package:photogpt/widgets/spacing.dart';
-import 'package:photogpt/chatgpt/utils.dart';
 import 'package:image_picker/image_picker.dart';
 
 class HomePageView extends StatelessWidget {
@@ -22,12 +23,12 @@ class HomePageView extends StatelessWidget {
           _page(
               icon: Icons.add_a_photo_outlined,
               title: 'Camera',
-              onTap: () => _onTapCamera(ImageSource.camera)),
+              onTap: () => _onTapCamera(context, ImageSource.gallery)),
           width(25),
           _page(
             icon: Icons.photo_size_select_actual_outlined,
             title: 'Gallery',
-            onTap: () => _onTapCamera(ImageSource.gallery),
+            onTap: () => _onTapCamera(context, ImageSource.gallery),
           ),
           width(55),
           _gotoChat,
@@ -112,30 +113,12 @@ class HomePageView extends StatelessWidget {
 
 // comment
 
-  void _onTapCamera(ImageSource source) async {
-    String resp = await GPTUtils.getGPTResponse(prompt: 'Hello Gpt, can openai api key be free?');
-    print('RESPONSE: $resp');
+  void _onTapCamera(BuildContext context, ImageSource source) async {
+    File? pickedImage = await AppMethods.pickImage(source: source);
 
-    File? pickedImage;
-    XFile? xPickedImage;
-    CroppedFile? croppedImage;
-    xPickedImage = await ImagePicker().pickImage(
-      source: source,
-    );
-
-    croppedImage = await ImageCropper().cropImage(
-      sourcePath: xPickedImage!.path,
-      maxWidth: 1080,
-      maxHeight: 1080,
-      aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
-    );
-
-    if (xPickedImage == null) {
-      pickedImage = null;
-      return;
+    if (pickedImage != null) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => ScanImageScreen(image: pickedImage)));
     }
-
-    pickedImage = croppedImage != null ? File(croppedImage.path) : null;
-    print('PICKED ${xPickedImage.path}');
   }
 }
